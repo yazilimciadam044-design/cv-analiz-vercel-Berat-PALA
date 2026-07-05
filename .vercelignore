@@ -1,0 +1,6 @@
+app.py
+test_all.py
+.venv
+__pycache__
+.pytest_cache
+*.db

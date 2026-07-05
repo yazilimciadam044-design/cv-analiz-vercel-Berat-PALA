@@ -42,30 +42,25 @@ def _clean_text(text: str) -> str:
 def extract_text_from_pdf(pdf_bytes: bytes) -> str:
     """
     PDF dosyasından metin çıkarır.
-    pdfplumber kullanır (tablo ve kolon destekli).
+    PyPDF2 kullanır (hafif ve Vercel dostu).
     """
     try:
-        import pdfplumber
+        import PyPDF2
     except ImportError:
-        raise ImportError("pdfplumber paketi yüklü değil. 'pip install pdfplumber' çalıştırın.")
+        raise ImportError("PyPDF2 paketi yüklü değil. 'pip install PyPDF2' çalıştırın.")
 
     text_parts = []
-    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-        if len(pdf.pages) == 0:
+    try:
+        reader = PyPDF2.PdfReader(io.BytesIO(pdf_bytes))
+        if len(reader.pages) == 0:
             raise ValueError("PDF dosyası boş veya okunamıyor.")
 
-        for page_num, page in enumerate(pdf.pages, 1):
-            page_text = page.extract_text(x_tolerance=3, y_tolerance=3)
+        for page in reader.pages:
+            page_text = page.extract_text()
             if page_text:
                 text_parts.append(page_text.strip())
-
-            tables = page.extract_tables()
-            for table in tables:
-                for row in table:
-                    clean_row = [cell.strip() if cell else "" for cell in row]
-                    row_text = " | ".join(filter(None, clean_row))
-                    if row_text.strip():
-                        text_parts.append(row_text)
+    except Exception as e:
+        raise ValueError(f"PDF okuma hatası: {str(e)}")
 
     full_text = "\n\n".join(text_parts).strip()
 
