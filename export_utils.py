@@ -173,28 +173,32 @@ def generate_docx(isim: str, meslek_alani: str, analiz: dict) -> bytes:
 
 def generate_csv(rows: list[dict]) -> bytes:
     """Analiz geçmişini CSV olarak döner."""
-    try:
-        import pandas as pd
-    except ImportError:
-        raise ImportError("pandas paketi yüklü değil.")
+    import csv
 
     records = []
     for row in rows:
         analiz = row.get("analiz_sonucu", {})
+        if not isinstance(analiz, dict):
+            analiz = {}
         records.append({
-            "ID": row.get("id"),
-            "İsim": row.get("isim"),
-            "Tarih": row.get("tarih"),
-            "Meslek Alanı": row.get("meslek_alani"),
-            "AI Modeli": row.get("ai_model"),
-            "Puan": row.get("puan"),
+            "ID": row.get("id", ""),
+            "İsim": row.get("isim", ""),
+            "Tarih": row.get("tarih", ""),
+            "Meslek Alanı": row.get("meslek_alani", ""),
+            "AI Modeli": row.get("ai_model", ""),
+            "Puan": row.get("puan", ""),
             "Güçlü Yönler": "; ".join(analiz.get("guclu_yonler", [])),
             "Eksikler": "; ".join(analiz.get("eksikler", [])),
             "Önerilen Meslekler": "; ".join(analiz.get("onerilen_meslekler", [])),
             "Öneriler": "; ".join(analiz.get("oneriler", [])),
         })
 
-    df = pd.DataFrame(records)
-    buf = io.BytesIO()
-    df.to_csv(buf, index=False, encoding="utf-8-sig")
-    return buf.getvalue()
+    buf = io.StringIO()
+    if records:
+        fieldnames = list(records[0].keys())
+        writer = csv.DictWriter(buf, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(records)
+
+    # Encode with utf-8-sig for Excel compatibility
+    return buf.getvalue().encode("utf-8-sig")
