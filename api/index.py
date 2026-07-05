@@ -26,6 +26,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def redirect_root():
+    # Vercel'in ana dizini API'ye yönlendirmesi ihtimaline karşı frontend'e yönlendir.
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/index.html")
+
+@app.get("/api")
+async def api_root():
+    return {"status": "success", "message": "API basariyla calisiyor!"}
+
 @app.get("/api/fetch-url")
 async def api_fetch_url(url: str):
     try:
