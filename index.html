@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI CV Analiz Sistemi</title>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN for interactive charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- ─── Sol Sidebar Menü ─── -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <img id="app-logo" src="logo.png" alt="🎯" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+                <div id="logo-fallback" class="logo-fallback" style="display: none;">🎯</div>
+                <div class="brand-text">
+                    <h2>AI CV Analiz</h2>
+                    <span>Kariyer Danışmanı</span>
+                </div>
+            </div>
+            
+            <hr class="sidebar-divider">
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="tab-analiz">
+                    <span class="nav-icon">🚀</span> CV Analiz
+                </button>
+                <button class="nav-item" data-tab="tab-gecmis">
+                    <span class="nav-icon">📋</span> Geçmiş Analizler
+                </button>
+                <button class="nav-item" data-tab="tab-istatistikler">
+                    <span class="nav-icon">📊</span> İstatistikler
+                </button>
+            </nav>
+            
+            <hr class="sidebar-divider">
+            
+            <div class="sidebar-settings">
+                <h3>⚙️ Ayarlar</h3>
+                
+                <div class="setting-group">
+                    <label for="ai-provider">🤖 AI Modeli</label>
+                    <select id="ai-provider">
+                        <option value="Gemini">Gemini</option>
+                        <option value="Groq">Groq</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group" id="gemini-group">
+                    <label for="gemini-model">Gemini Versiyonu</label>
+                    <select id="gemini-model">
+                        <option value="gemini-3.5-flash" selected>gemini-3.5-flash</option>
+                        <option value="gemini-3.1-pro">gemini-3.1-pro</option>
+                        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group hidden" id="groq-group">
+                    <label for="groq-model">Groq Modeli</label>
+                    <select id="groq-model">
+                        <option value="openai/gpt-oss-120b" selected>openai/gpt-oss-120b</option>
+                        <option value="openai/gpt-oss-20b">openai/gpt-oss-20b</option>
+                        <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+                        <option value="qwen/qwen3.6-27b">qwen/qwen3.6-27b</option>
+                    </select>
+                </div>
+            </div>
+            
+            <hr class="sidebar-divider">
+            
+            <!-- Hızlı İstatistikler (Mini Sidebar Widget) -->
+            <div class="sidebar-widget">
+                <h4>📊 Hızlı Durum</h4>
+                <div class="widget-metrics">
+                    <div class="widget-metric">
+                        <span class="w-label">Toplam Analiz</span>
+                        <span class="w-val" id="mini-total">0</span>
+                    </div>
+                    <div class="widget-metric">
+                        <span class="w-label">Ort. Puan</span>
+                        <span class="w-val" id="mini-avg">0/100</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <p><b>AI CV Analiz Sistemi</b></p>
+                <p>Necmeddin Tekik</p>
+                <p>Vercel Canlı Sürümü 2026</p>
+            </div>
+        </aside>
+        
+        <!-- ─── Ana İçerik Alanı ─── -->
+        <main class="main-content">
+            
+            <!-- Hero Banner -->
+            <header class="hero-banner">
+                <div class="hero-badge">✨ Yapay Zekâ Destekli</div>
+                <h1 class="hero-title">AI CV Analiz Sistemi</h1>
+                <p class="hero-subtitle">Metin yapıştırın, PDF yükleyin veya link ekleyin — CV'nizi anında analiz edin.</p>
+            </header>
+            
+            <!-- ════════════ SEKMELER ════════════ -->
+            
+            <!-- ── TAB 1: Analiz Arayüzü ── -->
+            <section id="tab-analiz" class="tab-pane active">
+                <div class="form-grid">
+                    <!-- Sol: Form Girişi -->
+                    <div class="form-card-container">
+                        <!-- İsim ve Meslek -->
+                        <div class="meta-inputs">
+                            <div class="input-field">
+                                <label for="user-name">👤 Adınız Soyadınız</label>
+                                <input type="text" id="user-name" placeholder="Örn: Ahmet Yılmaz" required>
+                            </div>
+                            <div class="input-field">
+                                <label for="job-area">🏷️ Hedef Meslek Alanı</label>
+                                <select id="job-area">
+                                    <option value="Yazılım" selected>Yazılım</option>
+                                    <option value="Data Science">Data Science</option>
+                                    <option value="Eğitim">Eğitim</option>
+                                    <option value="Finans">Finans</option>
+                                    <option value="Pazarlama">Pazarlama</option>
+                                    <option value="Tasarım">Tasarım</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- CV Girdi Yöntemi Alt Sekmeleri -->
+                        <div class="input-tab-header">
+                            <button class="input-tab-btn active" data-input-mode="text">📝 Metin Yapıştır</button>
+                            <button class="input-tab-btn" data-input-mode="pdf">📄 PDF Yükle</button>
+                            <button class="input-tab-btn" data-input-mode="url">🔗 Link Ekle</button>
+                        </div>
+                        
+                        <div class="input-tab-body">
+                            <!-- Metin Yapıştırma Alanı -->
+                            <div id="input-mode-text" class="input-pane active">
+                                <div class="glass-card">
+                                    <textarea id="cv-text-input" placeholder="CV'nizi kopyalayıp buraya yapıştırın...&#10;&#10;Örnek:&#10;Ad Soyad: ...&#10;Deneyim: ...&#10;Eğitim: ...&#10;Beceriler: ..."></textarea>
+                                    <div class="char-counter" id="char-counter">📝 0 karakter</div>
+                                </div>
+                            </div>
+                            
+                            <!-- PDF Yükleme Alanı -->
+                            <div id="input-mode-pdf" class="input-pane">
+                                <div class="glass-card dropzone" id="pdf-dropzone">
+                                    <div class="dropzone-content">
+                                        <div class="dropzone-icon">📎</div>
+                                        <h4>Sürükleyip Bırakın veya Tıklayın</h4>
+                                        <p>Maksimum 10 MB, yalnızca .pdf uzantılı dosyalar</p>
+                                        <input type="file" id="cv-file-input" accept=".pdf" style="display: none;">
+                                    </div>
+                                    <div id="pdf-file-info" class="file-info-container hidden">
+                                        <span class="file-success-icon">✅</span>
+                                        <span class="file-name" id="selected-file-name">cv.pdf</span>
+                                        <span class="file-size" id="selected-file-size">(0 KB)</span>
+                                        <button class="clear-file-btn" id="clear-file-btn">🗑️</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Link Ekleme Alanı -->
+                            <div id="input-mode-url" class="input-pane">
+                                <div class="glass-card url-input-container">
+                                    <p class="input-info-text">CV'nizin bulunduğu web sayfasının URL'sini girin. GitHub profili, kişisel site veya PDF linki desteklenir.</p>
+                                    <div class="url-input-row">
+                                        <input type="url" id="cv-url-input" placeholder="https://github.com/kullanici-adi veya https://example.com/cv.pdf">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hata/Uyarı Bildirimi -->
+                        <div id="form-error" class="error-banner hidden"></div>
+                        
+                        <!-- Butonlar -->
+                        <div class="action-buttons">
+                            <button id="analyze-btn" class="btn-primary">🚀 CV'yi Analiz Et</button>
+                            <button id="clear-btn" class="btn-secondary">🗑️ Temizle</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Sağ: Bilgilendirme Kartı -->
+                    <div class="info-card-container">
+                        <div class="glass-card info-card" id="how-to-use-card">
+                            <h3>💬 Nasıl Kullanılır?</h3>
+                            <ol class="how-to-list">
+                                <li>Adınızı ve soyadınızı girin.</li>
+                                <li>Hedef meslek alanını seçin.</li>
+                                <li>CV'nizi metin olarak yapıştırın, PDF dosyasını yükleyin ya da internet adresini ekleyin.</li>
+                                <li><b>CV'yi Analiz Et</b> butonuna basın.</li>
+                            </ol>
+                            <div class="tip-box">
+                                <strong>💡 İpucu</strong>
+                                <p>En az 200 karakter içeren dijital PDF'ler veya metinler en isabetli analiz sonuçlarını verir.</p>
+                            </div>
+                            <div class="security-box">
+                                <strong>🔐 Gizlilik ve Güvenlik</strong>
+                                <p>Dosyalarınız geçici olarak işlenir ve sadece sunucusuz oturumunuzun veritabanında tutulur. Asla üçüncü şahıslarla paylaşılmaz.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Yükleniyor Spinner Alanı -->
+                <div id="loading-spinner" class="spinner-container hidden">
+                    <div class="spinner"></div>
+                    <p id="spinner-text">🤖 AI CV'nizi analiz ediyor... Lütfen bekleyin.</p>
+                </div>
+                
+                <!-- Analiz Sonucu (Render Alanı) -->
+                <div id="analysis-result-container" class="results-container animate-in hidden">
+                    <hr>
+                    <!-- Özet Kartlar -->
+                    <div class="results-summary-row">
+                        <!-- Puan Çemberi (Sol) -->
+                        <div class="score-card">
+                            <div class="gauge-wrapper">
+                                <svg class="gauge" viewBox="0 0 100 100">
+                                    <!-- Background circle -->
+                                    <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+                                    <!-- Filled circle -->
+                                    <circle class="gauge-fill" id="score-gauge" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="283"></circle>
+                                    <!-- Text center -->
+                                    <text class="gauge-text" id="score-text" x="50" y="55">0</text>
+                                </svg>
+                                <span class="gauge-label">CV Puanı / 100</span>
+                            </div>
+                        </div>
+                        <!-- Analiz Künyesi (Sağ) -->
+                        <div class="metadata-card glass-card">
+                            <span class="card-subtitle">📋 Analiz Özeti</span>
+                            <h4 id="result-name">Ahmet Yılmaz</h4>
+                            <p class="meta-line">🏷️ Alan: <strong id="result-area">Yazılım</strong></p>
+                            <p class="meta-line">🤖 Model: <strong id="result-model">Gemini (gemini-3.5-flash)</strong></p>
+                            <p class="meta-line">📅 Tarih: <strong id="result-date">05.07.2026 14:00</strong></p>
+                            <div class="evaluation-tag" id="result-eval">Çok İyi! 👍</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Detay Bölümleri -->
+                    <div class="details-grid">
+                        <div class="detail-col">
+                            <div class="section-title">✅ Güçlü Yönler</div>
+                            <div class="detail-list" id="list-guclu">
+                                <!-- JS ile doldurulacak -->
+                            </div>
+                        </div>
+                        <div class="detail-col">
+                            <div class="section-title">❌ Eksikler ve Geliştirilmesi Gerekenler</div>
+                            <div class="detail-list" id="list-eksik">
+                                <!-- JS ile doldurulacak -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Önerilen Meslekler -->
+                    <div class="professions-section">
+                        <div class="section-title">🎯 Önerilen Meslekler</div>
+                        <div class="badge-container" id="container-meslekler">
+                            <!-- JS ile doldurulacak -->
+                        </div>
+                    </div>
+                    
+                    <!-- Kariyer Önerileri -->
+                    <div class="suggestions-section">
+                        <div class="section-title">💡 Kariyer Yol Haritası Önerileri</div>
+                        <div class="detail-list suggestions-list" id="list-oneriler">
+                            <!-- JS ile doldurulacak -->
+                        </div>
+                    </div>
+                    
+                    <!-- Rapor İndirme -->
+                    <div class="download-section">
+                        <div class="section-title">📥 Raporu İndir</div>
+                        <div class="download-buttons">
+                            <a id="download-pdf-btn" href="#" class="btn-download pdf-btn" target="_blank">📄 PDF İndir</a>
+                            <a id="download-word-btn" href="#" class="btn-download word-btn" target="_blank">📝 Word İndir</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ── TAB 2: Geçmiş Analizler ── -->
+            <section id="tab-gecmis" class="tab-pane">
+                <div class="tab-header-row">
+                    <div>
+                        <h2>📋 Analiz Geçmişi</h2>
+                        <p class="tab-subtitle">Daha önce yapılan tüm CV analizleri</p>
+                    </div>
+                    <!-- CSV İndir -->
+                    <a id="download-csv-btn" href="/api/download/csv" class="btn-primary" target="_blank">📊 Tüm Geçmişi CSV İndir</a>
+                </div>
+                
+                <!-- Arama ve Yenileme -->
+                <div class="search-bar-row">
+                    <input type="text" id="history-search" placeholder="İsim, meslek alanı veya içeriğe göre arayın...">
+                    <button id="refresh-history-btn" class="btn-secondary">🔄 Yenile</button>
+                </div>
+                
+                <div class="records-found" id="history-count">🔎 0 kayıt bulundu</div>
+                
+                <hr>
+                
+                <!-- Geçmiş Kayıtlar Listesi (Accordion) -->
+                <div class="history-list" id="history-accordion">
+                    <!-- JS ile doldurulacak -->
+                </div>
+            </section>
+            
+            <!-- ── TAB 3: İstatistikler ── -->
+            <section id="tab-istatistikler" class="tab-pane">
+                <h2>📊 İstatistikler ve Analizler</h2>
+                <p class="tab-subtitle">Genel kullanım metrikleri ve trend grafikleri</p>
+                
+                <!-- Metrik Kartları -->
+                <div class="metrics-row">
+                    <div class="metric-card glass-card">
+                        <span class="m-icon">📋</span>
+                        <div class="m-data">
+                            <span class="m-val" id="stat-total">0</span>
+                            <span class="m-label">Toplam Analiz</span>
+                        </div>
+                    </div>
+                    <div class="metric-card glass-card">
+                        <span class="m-icon">📈</span>
+                        <div class="m-data">
+                            <span class="m-val" id="stat-avg">0</span>
+                            <span class="m-label">Ortalama Puan</span>
+                        </div>
+                    </div>
+                    <div class="metric-card glass-card">
+                        <span class="m-icon">🏆</span>
+                        <div class="m-data">
+                            <span class="m-val" id="stat-max">0</span>
+                            <span class="m-label">En Yüksek Puan</span>
+                        </div>
+                    </div>
+                    <div class="metric-card glass-card">
+                        <span class="m-icon">⚠️</span>
+                        <div class="m-data">
+                            <span class="m-val" id="stat-min">0</span>
+                            <span class="m-label">En Düşük Puan</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Grafik Izgarası -->
+                <div class="charts-grid">
+                    <div class="chart-container glass-card">
+                        <h3>Meslek Alanı Dağılımı</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-alan"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container glass-card">
+                        <h3>AI Model Kullanımı</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-model"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container glass-card">
+                        <h3>Puan Dağılımı Frekansı</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-puan-dist"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container glass-card">
+                        <h3>Puan Trendi (Zamana Göre)</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-puan-trend"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
